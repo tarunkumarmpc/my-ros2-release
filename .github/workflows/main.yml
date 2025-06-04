@@ -1,0 +1,68 @@
+name: Centralized ROS 2 Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout release repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-vcstool python3-colcon-common-extensions python3-bloom python3-catkin-pkg python3-rosdep fakeroot
+
+      - name: Import all source repositories
+        run: |
+          mkdir -p src
+          vcs import src < system.repos
+
+      - name: Set up ROS 2
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+
+      - name: Install dependencies for all packages
+        run: |
+          sudo rosdep init || true
+          rosdep update
+          rosdep install --from-paths src --ignore-src -r -y
+
+      - name: Build and test the complete system
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --symlink-install
+          colcon test
+          colcon test-result --verbose
+
+      - name: Generate Debian packages
+        run: |
+          cd src
+          for pkg in *; do
+            if [ -d "$pkg" ]; then
+              cd $pkg
+              bloom-generate rosdebian
+              fakeroot debian/rules binary
+              cd ..
+            fi
+          done
+          cd ..
+
+      - name: Archive all .deb files
+        run: |
+          mkdir -p debs
+          find src -name "*.deb" -exec cp {} debs/ \;
+
+      - name: Upload .deb artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-packages
+          path: debs/*.deb
+
+      # Optional: Upload to internal APT repo or notify team
