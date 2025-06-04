@@ -1,0 +1,23 @@
+repositories:
+  ros2_examples:
+    type: git
+    url: https://github.com/ros2/examples.git
+    version: humble  # Or another branch/tag, e.g., 'main', 'jazzy', etc.
+
+  ros2_demos:
+    type: git
+    url: https://github.com/ros2/demos.git
+    version: humble  # Or another valid branch/tag
+
+  ros2_seminar_examples:
+    type: git
+    url: https://github.com/robotpilot/ros2-seminar-examples.git
+    version: master  # Or another branch/tag
+
+  ros2_code_examples:
+    type: git
+    url: https://github.com/alsora/ros2-code-examples.git
+    version: master  # Or a specific tag/branch
+
+  # Add more as needed for your system
+
