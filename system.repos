@@ -19,5 +19,3 @@ repositories:
     url: https://github.com/alsora/ros2-code-examples.git
     version: master  # Or a specific tag/branch
 
-  # Add more as needed for your system
-
